@@ -47,3 +47,33 @@ CONVERSION_FACTOR = sum(D.values()) / sum([driver * K[driver] for driver in DRIV
 # Maximum Shifts per Driver
 for i in DRIVERS:
     prob += sum(x[i][j] for j in SHIFTS) <= K[i]
+
+
+# Drivers Must Work Back to Back Consecutive Days
+for i in DRIVERS:
+    for j in SHIFTS:
+        prob += x[i][j] <= x[i][j+2] + x[i][j-2]
+
+# Number of Scheduled Drivers Can Not Exceed Shift Trucks
+for j in SHIFTS:
+    prob += sum(x[i][j] for i in DRIVERS) <= T[j]
+
+# Swing Shifts Require an Off Shift
+for i in DRIVERS:
+    for j in SHIFTS:
+        prob += x[i][j] + x[i][j+1] + x[i][j+2] + x[i][j+3] <= 2
+
+# Drivers May Not Work Consecutive Shifts Without a Break
+for i in DRIVERS:
+    for j in SHIFTS:
+        prob += x[i][j] + x[i][j+1] <= 1
+
+# Drivers Must Take Their Daus Off Consecutively
+for i in DRIVERS:
+    for j in SHIFTS:
+        prob += x[i][j] + x[i][j+1] + 1 >= (x[i][j-2] + x[i][j-1]) + (x[i][j+2] + x[i][j+1])
+
+# Total Number of Moves
+prob += sum(sum(x[i][j]-c[i][j])) == 2*Delta
+        Delta <= MSC
+
