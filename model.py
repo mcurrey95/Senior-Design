@@ -12,6 +12,11 @@ SHIFTS = [j for j in range(14)]
 # Decision Variables
 x = {i: {j: pulp.LpVariable('x({})({})'.format(i, j), cat=pulp.LpBinary) for j in SHIFTS} for i in DRIVERS}
 
+for i in DRIVERS:
+    for j in SHIFTS:
+        x[i][j+14] = x[i][j]
+        x[i][j-14] = x[i][j]
+
 # Intermediaries
 Delta = pulp.LpVariable("delta", lowBound=0, cat=pulp.LpInteger)
 R = {i: pulp.LpVariable("R{}".format(i), lowBound=0, cat=pulp.LpInteger) for i in DRIVERS}
