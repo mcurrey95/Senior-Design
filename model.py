@@ -14,8 +14,8 @@ x = {i: {j: pulp.LpVariable('x({})({})'.format(i, j), cat=pulp.LpBinary) for j i
 
 for i in DRIVERS:
     for j in SHIFTS:
-        x[i][j+14] = x[i][j]
-        x[i][j-14] = x[i][j]
+        x[i][j+14] = x[i][j]  # calls greater than 13
+        x[i][j-14] = x[i][j]  # calls less than 0
 
 # Intermediaries
 Delta = pulp.LpVariable("delta", lowBound=0, cat=pulp.LpInteger)
@@ -44,6 +44,11 @@ mu = {'R': {i: random.randint(1, 5) for i in DRIVERS},
 CONVERSION_FACTOR = sum(D.values()) / sum([driver * K[driver] for driver in DRIVERS])
 
 
+# Objective Function
+
+
+# Constraints
+
 # Maximum Shifts per Driver
 for i in DRIVERS:
     prob += sum(x[i][j] for j in SHIFTS) <= K[i]
@@ -54,26 +59,27 @@ for i in DRIVERS:
     for j in SHIFTS:
         prob += x[i][j] <= x[i][j+2] + x[i][j-2]
 
+
 # Number of Scheduled Drivers Can Not Exceed Shift Trucks
 for j in SHIFTS:
     prob += sum(x[i][j] for i in DRIVERS) <= T[j]
+
 
 # Swing Shifts Require an Off Shift
 for i in DRIVERS:
     for j in SHIFTS:
         prob += x[i][j] + x[i][j+1] + x[i][j+2] + x[i][j+3] <= 2
 
+
 # Drivers May Not Work Consecutive Shifts Without a Break
 for i in DRIVERS:
     for j in SHIFTS:
         prob += x[i][j] + x[i][j+1] <= 1
 
-# Drivers Must Take Their Daus Off Consecutively
+
+# Drivers Must Take Their Days Off Consecutively
 for i in DRIVERS:
     for j in SHIFTS:
         prob += x[i][j] + x[i][j+1] + 1 >= (x[i][j-2] + x[i][j-1]) + (x[i][j+2] + x[i][j+1])
 
-# Total Number of Moves
-prob += sum(sum(x[i][j]-c[i][j])) == 2*Delta
-        Delta <= MSC
-
+# Discomfort Points
