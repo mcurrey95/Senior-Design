@@ -12,4 +12,6 @@ SHIFTS = [day for day in range(14)]
 
 
 # class pulp.LpVariable(name, lowBound=None, upBound=None, cat='Continuous', e=None)
-DecisionVariables = {i: {j: pulp.LpVariable('') for j in SHIFTS} for i in DRIVERS}
+DecisionVariables = {i: {j: pulp.LpVariable('x({})({})'.format(i, j), cat=pulp.LpBinary) for j in SHIFTS} for i in DRIVERS}
+
+#
